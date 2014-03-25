@@ -16,5 +16,9 @@
   "gitHead": "2a931403f8c7303999db1d79db9f478008f4532a",
   "bugs": {
     "url": "https://github.com/david-martin/load-test-app.js/issues"
+  },
+  "dependencies": {
+    "express": "~3.5.0",
+    "fh-webapp": "~0.6.6"
   }
 }
