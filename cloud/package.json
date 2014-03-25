@@ -1,0 +1,20 @@
+{
+  "name": "load-test-app.js",
+  "version": "0.0.1",
+  "description": "Load test app with configurable endpoints",
+  "main": "application.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/david-martin/load-test-app.js.git"
+  },
+  "author": "david.martin@feedhenry.com",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "2a931403f8c7303999db1d79db9f478008f4532a",
+  "bugs": {
+    "url": "https://github.com/david-martin/load-test-app.js/issues"
+  }
+}
