@@ -43,8 +43,8 @@ app.get('/proxy/:size', function(req, res) {
   var size = req.params.size;
   console.log('retrieving cache size:', size);
   request('http://50.16.66.55:6969/static/' + size, function(err2, res2, body) {
-    if (err) {
-      return res.send(500, body);
+    if (err2) {
+      return res.send(500, err2);
     }
     return res.send(body);
   });
