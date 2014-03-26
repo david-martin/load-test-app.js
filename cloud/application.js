@@ -42,7 +42,7 @@ app.use('/static', express['static'](publicDir));
 app.get('/wait/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
-  console.log('wait:', wait, 'size:', size);
+  process.env.DEBUG && console.log('wait:', wait, 'size:', size);
   setTimeout(function() {
     fs.readFile(path.join(publicDir, size), function(err, file) {
       if (err) {
@@ -54,10 +54,11 @@ app.get('/wait/:wait/:size', function(req, res) {
 });
 
 // proxy routes
-app.get('/proxy/:size', function(req, res) {
+app.get('/proxy/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
   var size = req.params.size;
-  process.env.DEBUG && console.log('retrieving cache size:', size);
-  request('http://50.16.66.55:6969/static/' + size, function(err2, res2, body) {
+  process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
     if (err2) {
       return res.send(500, err2);
     }
@@ -69,7 +70,7 @@ app.get('/proxy/:size', function(req, res) {
 // cache routes
 app.get('/cache/:size', function(req, res) {
   var size = req.params.size;
-  process.env.DEBUG && console.log('retrieving cache size:', size);
+  process.env.DEBUG && console.log('cache size:', size);
   $fh.cache({
     act: "load",
     key: size
