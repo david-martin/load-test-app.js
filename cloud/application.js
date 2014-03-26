@@ -57,10 +57,10 @@ app.get('/cache/:size', function(req, res) {
   }, function(err, res) {
     if (err) {
       console.error('Error retrieving from cache, size:', size);
-      return callback(err);
+      return res.send(500, err);
     } else {
       console.log('Retrieved from cache, size:', size, ' length:', res.length);
-      return callback(null, res);
+      return res.send(200, res);
     }
   });
 });
