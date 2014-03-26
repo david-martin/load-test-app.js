@@ -15,27 +15,27 @@ app.use('/cloud', webapp.cloud(mainjs));
 
 // add static file contents to cache
 var publicDir = path.join(__dirname, 'public');
-// fs.readdir(publicDir, function(err, files) {
-//   files.forEach(function(file) {
-//     var filePath = path.join(publicDir, file);
-//     console.log('Caching file:', filePath, 'with key:', file);
-//     $fh.cache({
-//       act: "save",
-//       key: file,
-//       value: fs.readFileSync(filePath)
-//     }, function(err, res) {
-//       if (err) {
-//         console.error('Error caching file:', filePath, 'err:', err.toString());
-//       } else {
-//         console.error('Cached file:', filePath, 'err:', err.toString());
-//       }
-//     });
-//   });
-// });
+ fs.readdir(publicDir, function(err, files) {
+   files.forEach(function(file) {
+     var filePath = path.join(publicDir, file);
+     console.log('Caching file:', filePath, 'with key:', file);
+     /*$fh.cache({
+       act: "save",
+       key: file,
+       value: fs.readFileSync(filePath)
+     }, function(err, res) {
+       if (err) {
+         console.error('Error caching file:', filePath, 'err:', err.toString());
+       } else {
+         console.error('Cached file:', filePath, 'err:', err.toString());
+       }
+     });*/
+   });
+ });
 
 
 // static routes
-app.use('/static', express.static(publicDir));
+app.use('/static', express['static'](publicDir));
 
 
 // proxy routes
@@ -48,19 +48,19 @@ app.use('/static', express.static(publicDir));
 
 
 // cache routes
-// app.get('/cache/:size', function(req, res) {
-//   //load
-//   $fh.cache({
-//     act: "load",
-//     key: req.params.size
-//   }, function(err, res) {
-//     if (err) {
-//       return callback(err);
-//     } else {
-//       return callback(null, res);
-//     }
-//   })
-// });
+app.get('/cache/:size', function(req, res) {
+  //load
+  $fh.cache({
+    act: "load",
+    key: req.params.size
+  }, function(err, res) {
+    if (err) {
+      return callback(err);
+    } else {
+      return callback(null, res);
+    }
+  });
+});
 
 // You can define custom URL handlers here, like this one:
 app.get('/', function(req, res){
