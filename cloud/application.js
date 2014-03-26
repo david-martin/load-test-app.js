@@ -19,7 +19,7 @@ var publicDir = path.join(__dirname, 'public');
    files.forEach(function(file) {
      var filePath = path.join(publicDir, file);
      console.log('Caching file:', filePath, 'with key:', file);
-     /*$fh.cache({
+     $fh.cache({
        act: "save",
        key: file,
        value: fs.readFileSync(filePath)
@@ -29,7 +29,7 @@ var publicDir = path.join(__dirname, 'public');
        } else {
          console.error('Cached file:', filePath, 'err:', err.toString());
        }
-     });*/
+     });
    });
  });
 
