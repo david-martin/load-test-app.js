@@ -54,13 +54,13 @@ app.get('/cache/:size', function(req, res) {
   $fh.cache({
     act: "load",
     key: size
-  }, function(err, res) {
+  }, function(err, data) {
     if (err) {
       console.error('Error retrieving from cache, size:', size);
       return res.send(500, err);
     } else {
-      console.log('Retrieved from cache, size:', size, ' length:', res.length);
-      return res.send(res.toString());
+      console.log('Retrieved from cache, size:', size, ' length:', data.length);
+      return res.send(data);
     }
   });
 });
