@@ -27,7 +27,7 @@ var publicDir = path.join(__dirname, 'public');
        if (err) {
          console.error('Error caching file:', filePath, 'err:', err.toString());
        } else {
-         console.error('Cached file:', filePath, 'err:', err.toString());
+         console.log('Cached file:', filePath);
        }
      });
    });
