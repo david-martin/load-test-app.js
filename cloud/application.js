@@ -38,6 +38,21 @@ var publicDir = path.join(__dirname, 'public');
 app.use('/static', express['static'](publicDir));
 
 
+// wait routes
+app.get('/wait/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
+  var size = req.params.size;
+  console.log('wait:', wait, 'size:', size);
+  setTimeout(function() {
+    fs.readFile(path.join(publicDir, size), function(err, file) {
+      if (err) {
+        return res.send(500, err);
+      }
+      return res.send(file);
+    });
+  }, wait);
+});
+
 // proxy routes
 app.get('/proxy/:size', function(req, res) {
   var size = req.params.size;
