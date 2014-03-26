@@ -39,12 +39,13 @@ app.use('/static', express['static'](publicDir));
 
 
 // proxy routes
-// app.get('/proxy/:size', function(req, res) {
-//   var size = req.params.size;
-//   request('http://10.110.155.166/' + req.params.size, function(err, res) {
-//
-//   });
-// });
+app.get('/proxy/:size', function(req, res) {
+  var size = req.params.size;
+  console.log('retrieving cache size:', size);
+  request('http://50.16.66.55:6969/static/' + size, function(err, res) {
+    
+  });
+});
 
 
 // cache routes
