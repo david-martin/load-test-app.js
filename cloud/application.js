@@ -18,7 +18,7 @@ var publicDir = path.join(__dirname, 'public');
  fs.readdir(publicDir, function(err, files) {
    files.forEach(function(file) {
      var filePath = path.join(publicDir, file);
-     console.log('Caching file:', filePath, 'with key:', file);
+     process.env.DEBUG && console.log('Caching file:', filePath, 'with key:', file);
      $fh.cache({
        act: "save",
        key: file,
@@ -27,7 +27,7 @@ var publicDir = path.join(__dirname, 'public');
        if (err) {
          console.error('Error caching file:', filePath, 'err:', err.toString());
        } else {
-         console.log('Cached file:', filePath);
+         process.env.DEBUG && console.log('Cached file:', filePath);
        }
      });
    });
@@ -41,7 +41,7 @@ app.use('/static', express['static'](publicDir));
 // proxy routes
 app.get('/proxy/:size', function(req, res) {
   var size = req.params.size;
-  console.log('retrieving cache size:', size);
+  process.env.DEBUG && console.log('retrieving cache size:', size);
   request('http://50.16.66.55:6969/static/' + size, function(err2, res2, body) {
     if (err2) {
       return res.send(500, err2);
@@ -54,7 +54,7 @@ app.get('/proxy/:size', function(req, res) {
 // cache routes
 app.get('/cache/:size', function(req, res) {
   var size = req.params.size;
-  console.log('retrieving cache size:', size);
+  process.env.DEBUG && console.log('retrieving cache size:', size);
   $fh.cache({
     act: "load",
     key: size
@@ -63,7 +63,7 @@ app.get('/cache/:size', function(req, res) {
       console.error('Error retrieving from cache, size:', size);
       return res.send(500, err);
     } else {
-      console.log('Retrieved from cache, size:', size, ' length:', data.length);
+      process.env.DEBUG && console.log('Retrieved from cache, size:', size, ' length:', data.length);
       return res.send(data);
     }
   });
