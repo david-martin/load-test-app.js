@@ -55,21 +55,21 @@ app.get('/wait/:wait/:size', function(req, res) {
 });
 
 
-if (!process.env.STANDALONE) {
-  // proxy routes
-  app.get('/proxy/:wait/:size', function(req, res) {
-    var wait = req.params.wait;
-    var size = req.params.size;
-    process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
-    request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
-      if (err2) {
-        return res.send(500, err2);
-      }
-      return res.send(body);
-    });
+// proxy routes
+app.get('/proxy/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
+  var size = req.params.size;
+  process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
+    if (err2) {
+      return res.send(500, err2);
+    }
+    return res.send(body);
   });
+});
   
   
+if (!process.env.STANDALONE) {
   // cache routes
   app.get('/cache/:size', function(req, res) {
     var size = req.params.size;
