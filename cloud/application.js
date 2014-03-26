@@ -22,7 +22,7 @@ var publicDir = path.join(__dirname, 'public');
      $fh.cache({
        act: "save",
        key: file,
-       value: fs.readFileSync(filePath)
+       value: fs.readFileSync(filePath).toString('utf8')
      }, function(err, res) {
        if (err) {
          console.error('Error caching file:', filePath, 'err:', err.toString());
