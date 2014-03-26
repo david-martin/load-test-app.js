@@ -60,7 +60,7 @@ app.get('/cache/:size', function(req, res) {
       return res.send(500, err);
     } else {
       console.log('Retrieved from cache, size:', size, ' length:', res.length);
-      return res.send(200, res);
+      return res.send(res.toString());
     }
   });
 });
