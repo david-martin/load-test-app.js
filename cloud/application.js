@@ -49,14 +49,17 @@ app.use('/static', express['static'](publicDir));
 
 // cache routes
 app.get('/cache/:size', function(req, res) {
-  //load
+  var size = req.params.size;
+  console.log('retrieving cache size:', size);
   $fh.cache({
     act: "load",
-    key: req.params.size
+    key: size
   }, function(err, res) {
     if (err) {
+      console.error('Error retrieving from cache, size:', size);
       return callback(err);
     } else {
+      console.log('Retrieved from cache, size:', size, ' length:', res.length);
       return callback(null, res);
     }
   });
