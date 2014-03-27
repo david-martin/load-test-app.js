@@ -47,6 +47,7 @@ app.get('/wait/:wait/:size', function(req, res) {
   var start = Date.now();
   setTimeout(function() {
     console.log('t',Date.now() - start);
+    res.set("Connection", "close"); // ab needs this
     fs.createReadStream(path.join(publicDir, size)).pipe(res);
   }, wait);
 });
@@ -57,6 +58,7 @@ app.get('/proxy/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
   process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  res.set("Connection", "close"); // ensure proxied response will get closed
   req.pipe(request('http://50.16.66.55:6969/wait/' + wait + '/' + size)).pipe(res);
 
   // Uncomment to buffer entire response before sending back
