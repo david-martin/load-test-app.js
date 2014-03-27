@@ -44,13 +44,10 @@ app.get('/wait/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
   process.env.DEBUG && console.log('wait:', wait, 'size:', size);
+  var start = Date.now();
   setTimeout(function() {
-    fs.readFile(path.join(publicDir, size), function(err, file) {
-      if (err) {
-        return res.send(500, err);
-      }
-      return res.send(file);
-    });
+    console.log('t',Date.now() - start);
+    fs.createReadStream(path.join(publicDir, size)).pipe(res);
   }, wait);
 });
 
@@ -60,15 +57,18 @@ app.get('/proxy/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
   process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
-  request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
-    if (err2) {
-      return res.send(500, err2);
-    }
-    return res.send(body);
-  });
+  req.pipe(request('http://50.16.66.55:6969/wait/' + wait + '/' + size)).pipe(res);
+
+  // Uncomment to buffer entire response before sending back
+  // request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
+  //   if (err2) {
+  //     return res.send(500, err2);
+  //   }
+  //   return res.send(body);
+  // });
 });
-  
-  
+
+
 if (!process.env.STANDALONE) {
   // cache routes
   app.get('/cache/:size', function(req, res) {
