@@ -5,23 +5,28 @@ var mainjs = require('./main.js');
 var fs = require('fs');
 var path = require('path');
 
+var request = require('request');
 // bypass default http limitations on connection pool
-var request = require('hyperquest');
+var hyperquest = require('hyperquest');
 
 var app = express();
 app.use('/sys', webapp.sys(mainjs));
 //app.use('/mbaas', webapp.mbaas);
 app.use('/cloud', webapp.cloud(mainjs));
 
-
+var PROXY_HOST = process.env.PROXY_HOST || '50.16.66.55';
+var PROXY_PORT = process.env.PROXY_PORT || '6969';
+var DEBUG = process.env.DEBUG || false;
+var PORT = process.env.FH_PORT || process.env.VCAP_APP_PORT || 8001;
+var DISABLE_CACHE = process.env.DISABLE_CACHE || false;
 
 // add static file contents to cache
 var publicDir = path.join(__dirname, 'public');
-if (!process.env.STANDALONE) {
+if (!DISABLE_CACHE) {
   fs.readdir(publicDir, function(err, files) {
      files.forEach(function(file) {
        var filePath = path.join(publicDir, file);
-       process.env.DEBUG && console.log('Caching file:', filePath, 'with key:', file);
+       DEBUG && console.log('Caching file:', filePath, 'with key:', file);
        $fh.cache({
          act: "save",
          key: file,
@@ -30,7 +35,7 @@ if (!process.env.STANDALONE) {
          if (err) {
            console.error('Error caching file:', filePath, 'err:', err.toString());
          } else {
-           process.env.DEBUG && console.log('Cached file:', filePath);
+           DEBUG && console.log('Cached file:', filePath);
          }
        });
      });
@@ -45,10 +50,10 @@ app.use('/static', express['static'](publicDir));
 app.get('/wait/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
-  process.env.DEBUG && console.log('wait:', wait, 'size:', size);
+  DEBUG && console.log('wait:', wait, 'size:', size);
   var start = Date.now();
   setTimeout(function() {
-    process.env.DEBUG && console.log('t',Date.now() - start);
+    DEBUG && console.log('t',Date.now() - start);
     res.set("Connection", "close"); // ab needs this
     fs.createReadStream(path.join(publicDir, size)).pipe(res);
   }, wait);
@@ -56,31 +61,75 @@ app.get('/wait/:wait/:size', function(req, res) {
 
 
 // proxy routes
-app.get('/proxy/:wait/:size', function(req, res) {
+app.get('/requestbuffer/:wait/:size', function(req, res) {
   var wait = req.params.wait;
   var size = req.params.size;
-  process.env.DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  DEBUG && console.log('proxy wait:', wait, 'size:', size);
   res.set("Connection", "close"); // ensure proxied response will get closed
 
-  // this slows things down for some reason, so not using pipe
-  //req.pipe(request('http://50.16.66.55:6969/wait/' + wait + '/' + size)).pipe(res);
-
   var start = Date.now();
-  request('http://50.16.66.55:6969/wait/' + wait + '/' + size, function(err2, res2, body) {
-    process.env.DEBUG && console.log(Date.now() - start);
+  request('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size, function(err2, res2, body) {
     if (err2) {
+      console.error('Error in requestbuffer after ', Date.now() - start, 'ms err:', err2);
       return res.send(500, err2);
     }
+    DEBUG && console.log('rb', Date.now() - start);
     return res.send(body);
   });
 });
 
+app.get('/requestpipe/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
+  var size = req.params.size;
+  DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  res.set("Connection", "close"); // ensure proxied response will get closed
 
-if (!process.env.STANDALONE) {
+  req.pipe(request('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size)).pipe(res);
+});
+
+app.get('/hyperbuffer/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
+  var size = req.params.size;
+  DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  res.set("Connection", "close"); // ensure proxied response will get closed
+
+  var start = Date.now();
+  hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size, function(err2, res2) {
+    if (err2) {
+      console.error('Error in hyperbuffer request after ', Date.now() - start, 'ms err:', err2);
+      return res.send(500, err2);
+    }
+
+    var body = '';
+    res2.on('data', function(data) {
+      body += data;
+    });
+    res2.on('error', function(err3) {
+      console.error('Error in hyperbuffer response stream after ', Date.now() - start, 'ms err:', err3);
+      return res.send(500, err3);
+    });
+    res2.on('end', function() {
+      DEBUG && console.log('hb', Date.now() - start);
+      return res.send(body);
+    });
+  });
+});
+
+app.get('/hyperpipe/:wait/:size', function(req, res) {
+  var wait = req.params.wait;
+  var size = req.params.size;
+  DEBUG && console.log('proxy wait:', wait, 'size:', size);
+  res.set("Connection", "close"); // ensure proxied response will get closed
+
+  hyperrequest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size).pipe(res);
+});
+
+
+if (!DISABLE_CACHE) {
   // cache routes
   app.get('/cache/:size', function(req, res) {
     var size = req.params.size;
-    process.env.DEBUG && console.log('cache size:', size);
+    DEBUG && console.log('cache size:', size);
     $fh.cache({
       act: "load",
       key: size
@@ -89,7 +138,7 @@ if (!process.env.STANDALONE) {
         console.error('Error retrieving from cache, size:', size);
         return res.send(500, err);
       } else {
-        process.env.DEBUG && console.log('Retrieved from cache, size:', size, ' length:', data.length);
+        DEBUG && console.log('Retrieved from cache, size:', size, ' length:', data.length);
         return res.send(data);
       }
     });
@@ -101,7 +150,6 @@ app.get('/', function(req, res){
   res.end('Your Cloud App is Running');
 });
 
-var port = process.env.FH_PORT || process.env.VCAP_APP_PORT || 8001;
-module.exports = app.listen(port, function(){
-  console.log("App started at: " + new Date() + " (internal port " + port + ")");
+module.exports = app.listen(PORT, function(){
+  console.log("App started at: " + new Date() + " (internal port " + PORT + ")");
 });
