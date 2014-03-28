@@ -21,6 +21,7 @@
     "express": "~3.5.0",
     "fh-webapp": "~0.6.6",
     "fh-api": "~0.2.5",
-    "request": "~2.34.0"
+    "request": "~2.34.0",
+    "hyperquest": "~0.3.0"
   }
 }
