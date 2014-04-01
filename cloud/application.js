@@ -122,6 +122,22 @@ app.get('/hyperpipe/:wait/:size', function(req, res) {
   res.set("Connection", "close"); // ensure proxied response will get closed
 
   hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size).pipe(res);
+
+  try {
+    var req2 = hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size, function(err, res2) {
+      if (err) {
+        console.error(err);
+        return res.send(500);
+      }
+    });
+    req2.on('error', function(e) {
+      console.error('Stream error', e);
+    });
+    req2.pipe(res);
+  } catch(e){
+    console.error('Caught hyperquest exception');
+    console.error(e);
+  }
 });
 
 
