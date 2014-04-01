@@ -121,7 +121,7 @@ app.get('/hyperpipe/:wait/:size', function(req, res) {
   DEBUG && console.log('proxy wait:', wait, 'size:', size);
   res.set("Connection", "close"); // ensure proxied response will get closed
 
-  hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size).pipe(res);
+  //hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size).pipe(res);
 
   try {
     var req2 = hyperquest('http://' + PROXY_HOST + ':' + PROXY_PORT + '/wait/' + wait + '/' + size, function(err, res2) {
